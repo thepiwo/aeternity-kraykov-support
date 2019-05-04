@@ -15,6 +15,7 @@
  *  PERFORMANCE OF THIS SOFTWARE.
  */
 const Ae = require('@aeternity/aepp-sdk').Universal;
+const Crypto = require('@aeternity/aepp-sdk').Crypto;
 
 const config = {
     host: "http://localhost:3001/",
@@ -24,9 +25,14 @@ const config = {
     compilerUrl: 'https://compiler.aepps.com'
 };
 
+const decodeAddress = (key) => {
+    const decoded58address = Crypto.decodeBase58Check(key.split('_')[1]).toString('hex');
+    return `#${decoded58address}`;
+};
+
 describe('Example Contract', () => {
 
-    let owner, contract, receiverPublicKey;
+    let owner, deployedContract, receiverPublicKey;
 
     before(async () => {
         const ownerKeyPair = wallets[0];
@@ -46,16 +52,18 @@ describe('Example Contract', () => {
 
         receiverPublicKey = wallets[1].publicKey;
 
-        contract = await owner.getContractInstance(contractSource);
-        let deploy = await contract.deploy([receiverPublicKey, 1000]);
+        let compiledContract = await owner.contractCompile(contractSource);
 
-        assert.equal(deploy.deployInfo.result.returnType, 'ok', 'Could not deploy Example Contract');
+        // using the non-high-level contract interface, you will have to do things like address decoding yourself instead of the sdk doing it for you
+        deployedContract = await compiledContract.deploy([decodeAddress(receiverPublicKey), '1000']).catch(console.error);
+
+        assert.equal(deployedContract.result.returnType, 'ok', 'Could not deploy Example Contract');
     });
 
     it('Example Contract Spend Successful', async () => {
         const receiverBalanceInitial = await owner.balance(receiverPublicKey);
 
-        let spend = await contract.call('spend', [], {amount: 1000}); // amount spends the amount from caller of the contract to the contract
+        let spend = await deployedContract.call('spend', [], {amount: 1000}); // amount spends the amount from caller of the contract to the contract
         console.log(spend);
 
         const receiverBalanceAfterwards = await owner.balance(receiverPublicKey);
