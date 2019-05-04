@@ -1,0 +1,10 @@
+contract ExampleContract =
+  record state =
+    { receiver : address
+    , amount : int }
+
+  public function init(receiver : address, amount : int) : state =
+    { receiver = receiver, amount = amount }
+
+  public function spend() =
+    Chain.spend(state.receiver, state.amount)
