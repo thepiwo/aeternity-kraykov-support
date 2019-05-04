@@ -59,7 +59,7 @@ describe('Example Contract', () => {
         console.log(spend);
 
         const receiverBalanceAfterwards = await owner.balance(receiverPublicKey);
-        assert.equal(parseInt(receiverBalanceInitial), parseInt(receiverBalanceAfterwards) + 1000); // don't use parseInt, use a library like bignumber.js
+        assert.equal(parseInt(receiverBalanceInitial) + 1000, parseInt(receiverBalanceAfterwards)); // don't use parseInt, use a library like bignumber.js
     });
 
 });
