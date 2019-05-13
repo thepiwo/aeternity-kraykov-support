@@ -1,0 +1,5 @@
+contract Token =
+  type state = ()
+
+  public function amount() : int =
+    1

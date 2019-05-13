@@ -15,6 +15,7 @@
  *  PERFORMANCE OF THIS SOFTWARE.
  */
 const Ae = require('@aeternity/aepp-sdk').Universal;
+const Crypto = require('@aeternity/aepp-sdk').Crypto;
 
 const config = {
     host: "http://localhost:3001/",
@@ -24,9 +25,14 @@ const config = {
     compilerUrl: 'https://compiler.aepps.com'
 };
 
+const decodeAddress = (key) => {
+    const decoded58address = Crypto.decodeBase58Check(key.split('_')[1]).toString('hex');
+    return `#${decoded58address}`;
+};
+
 describe('Example Contract', () => {
 
-    let owner, contract, receiverPublicKey;
+    let owner;
 
     before(async () => {
         const ownerKeyPair = wallets[0];
@@ -42,24 +48,22 @@ describe('Example Contract', () => {
     });
 
     it('Deploying Example Contract', async () => {
-        let contractSource = utils.readFileRelative('./contracts/ExampleContract.aes', "utf-8"); // Read the aes file
+        let tokenContractSource = utils.readFileRelative('./contracts/Token.aes', "utf-8"); // Read the aes file
+        let tokenContract = await owner.getContractInstance(tokenContractSource);
+        await tokenContract.deploy().catch(console.error);
 
-        receiverPublicKey = wallets[1].publicKey;
+        console.log(tokenContract);
 
-        contract = await owner.getContractInstance(contractSource);
-        let deploy = await contract.deploy([receiverPublicKey, 1000]);
+        let exampleContractSource = utils.readFileRelative('./contracts/ExampleContract.aes', "utf-8"); // Read the aes file
+        let exampleContract = await owner.getContractInstance(exampleContractSource);
+        await exampleContract.deploy().catch(console.error);
 
-        assert.equal(deploy.deployInfo.result.returnType, 'ok', 'Could not deploy Example Contract');
-    });
+        console.log(exampleContract);
 
-    it('Example Contract Spend Successful', async () => {
-        const receiverBalanceInitial = await owner.balance(receiverPublicKey);
+        let call = await exampleContract.call('test', [`Some(${decodeAddress(tokenContract.deployInfo.address)})`]);
 
-        let spend = await contract.call('spend', [], {amount: 1000}); // amount spends the amount from caller of the contract to the contract
-        console.log(spend);
+        console.log("decode: " + await call.decode());
 
-        const receiverBalanceAfterwards = await owner.balance(receiverPublicKey);
-        assert.equal(parseInt(receiverBalanceInitial) + 1000, parseInt(receiverBalanceAfterwards)); // don't use parseInt, use a library like bignumber.js
     });
 
 });
