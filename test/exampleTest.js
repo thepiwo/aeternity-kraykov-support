@@ -32,10 +32,10 @@ const decodeAddress = (key) => {
 
 describe('Example Contract', () => {
 
-    let owner;
+    let owner, ownerKeyPair;
 
     before(async () => {
-        const ownerKeyPair = wallets[0];
+        ownerKeyPair = wallets[0];
         owner = await Ae({
             url: config.host,
             internalUrl: config.internalHost,
@@ -56,11 +56,14 @@ describe('Example Contract', () => {
 
         let exampleContractSource = utils.readFileRelative('./contracts/ExampleContract.aes', "utf-8"); // Read the aes file
         let exampleContract = await owner.getContractInstance(exampleContractSource);
-        await exampleContract.deploy().catch(console.error);
+
+        await exampleContract.deploy([ownerKeyPair.publicKey, 0, 0]).catch(console.error);
 
         console.log(exampleContract);
 
-        let call = await exampleContract.call('test', [`Some(${decodeAddress(tokenContract.deployInfo.address)})`]);
+        console.log([`Some(${decodeAddress(tokenContract.deployInfo.address)})`, "1000000000000000000", ownerKeyPair.publicKey, ownerKeyPair.publicKey]);
+
+        let call = await exampleContract.call('deposit', [`Some(${decodeAddress(tokenContract.deployInfo.address)})`, "1000000000000000000", ownerKeyPair.publicKey, ownerKeyPair.publicKey]);
 
         console.log("decode: " + await call.decode());
 

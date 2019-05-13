@@ -1,5 +1,8 @@
 contract Token =
   type state = ()
 
-  public function amount() : int =
-    1
+  public function transfer(address, int) : bool =
+    true
+
+  public function transferFrom(address, address, int) : bool =
+    true
