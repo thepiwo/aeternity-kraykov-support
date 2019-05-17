@@ -1,10 +1,5 @@
 contract ExampleContract =
-  record state =
-    { receiver : address
-    , amount : int }
+  type state = ()
 
-  public function init(receiver : address, amount : int) : state =
-    { receiver = receiver, amount = amount }
-
-  public function spend() =
-    Chain.spend(state.receiver, state.amount)
+  public function test(test : map(address, int)) : map(address, int) =
+    test

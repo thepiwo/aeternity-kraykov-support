@@ -9,7 +9,7 @@
   "author": "",
   "license": "ISC",
   "dependencies": {
-    "@aeternity/aepp-sdk": "3.0.0",
+    "@aeternity/aepp-sdk": "3.2.1",
     "forgae": "1.4.0",
     "yarn": "1.15.2"
   }

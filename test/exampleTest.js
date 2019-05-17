@@ -47,19 +47,22 @@ describe('Example Contract', () => {
         receiverPublicKey = wallets[1].publicKey;
 
         contract = await owner.getContractInstance(contractSource);
-        let deploy = await contract.deploy([receiverPublicKey, 1000]);
+        let deploy = await contract.deploy();
 
         assert.equal(deploy.deployInfo.result.returnType, 'ok', 'Could not deploy Example Contract');
     });
 
     it('Example Contract Spend Successful', async () => {
-        const receiverBalanceInitial = await owner.balance(receiverPublicKey);
 
-        let spend = await contract.call('spend', [], {amount: 1000}); // amount spends the amount from caller of the contract to the contract
-        console.log(spend);
 
-        const receiverBalanceAfterwards = await owner.balance(receiverPublicKey);
-        assert.equal(parseInt(receiverBalanceInitial) + 1000, parseInt(receiverBalanceAfterwards)); // don't use parseInt, use a library like bignumber.js
+        let myMap = {
+            [receiverPublicKey]: 100
+        };
+
+        console.log(myMap);
+
+        let spend = await contract.call('test', [myMap]); // amount spends the amount from caller of the contract to the contract
+        console.log(await spend.decode());
     });
 
 });
